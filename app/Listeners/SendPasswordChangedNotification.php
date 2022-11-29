@@ -29,6 +29,6 @@ class SendPasswordChangedNotification implements ShouldQueue
     public function handle(PasswordChanged $event)
     {
         //
-        Mail::to($event->user["email"])->send(new MailPasswordChanged($event->user, $event->data));
+        Mail::to($event->user->email)->send(new MailPasswordChanged($event->user, $event->data));
     }
 }

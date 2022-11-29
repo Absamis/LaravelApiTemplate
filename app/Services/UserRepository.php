@@ -86,4 +86,67 @@ class UserRepository extends BaseRepository
             return $this->processResponse("99", "Error occured. Try again");
         }
     }
+
+    public function login($data)
+    {
+        try {
+            $email = $data["email"];
+            $password = $data["password"];
+            $user = User::where("email", $email)->first();
+            if (!$user)
+                return $this->processResponse("99", "Invalid login details");
+            $pass = $user->password;
+            if (!Hash::check($password, $pass))
+                return $this->processResponse("99", "The email and password does not match");
+            $status = $user->status;
+            if ($status == 0) {
+                $response = $this->sendAccountVerificationCode($user);
+                if ($response["success"]) {
+                    return $this->processResponse("90", "Account not verified. Verification code sent to your mail", $response["data"]);
+                }
+                return $this->processResponse("99", "Error loging you in to the application. Try again");
+            }
+            $user->login_status = 1;
+            $user->last_login = now();
+            $user->save();
+            $user->refresh();
+            return $this->processResponse("00", "Login Successful", $user);
+        } catch (Exception $ex) {
+            return $this->processResponse("99", "Error occured. Try again");
+        }
+    }
+
+    public function changePassword($userid, $data)
+    {
+        try {
+            $currentpassword = $data["currentpassword"];
+            $password = $data["newpassword"];
+            $user = User::find($userid);
+            $pass = $user->password;
+
+            if (!Hash::check($currentpassword, $pass))
+                return $this->processResponse("99", "Incorrect password. Try again");
+            // $rmtkn = md5(Str::uuid());
+            // $user->remember_token = $rmtkn;
+            $user->password = Hash::make($password);
+            $user->save();
+            // $user->refresh();
+            PasswordChanged::dispatch($user);
+            return $this->processResponse("00", "Password changed successfully");
+        } catch (Exception $ex) {
+            return $this->processResponse("99", "Error occured. Try again");
+        }
+    }
+
+    public function logout($userid)
+    {
+        try {
+            $user = User::find($userid);
+            $user->login_status = 0;
+            $user->save();
+            return $this->processResponse("00", "Log out Successful");
+        } catch (Exception $ex) {
+            return $this->processResponse("99", "Error occured. Try again");
+        }
+    }
 }

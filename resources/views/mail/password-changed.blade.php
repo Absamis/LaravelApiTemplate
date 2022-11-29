@@ -1,3 +1,3 @@
-<p>You password as been changed from the following location</p>
-<p>{{ $_SERVER['HTTP_USER_AGENT'] }}</p>
-<p>{{ $_SERVER['REMOTE_ADDR'] }}</p>
+<p>Your password has been changed.</p>
+{{-- <p>{{ $_SERVER['HTTP_USER_AGENT'] ?? null }}</p> --}}
+{{-- <p>{{ $_SERVER['REMOTE_ADDR'] }}</p> --}}

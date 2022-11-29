@@ -1,6 +1,7 @@
 <?php
 header("Content-Type: application/json");
 
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Http\Request;
@@ -35,3 +36,15 @@ Route::post("auth/password", [UserController::class, "forgotPassword"])->name("f
 Route::get("auth/password/verify", [VerificationController::class, "verifyPasswordRecovery"])->name("verify-forget-password");
 Route::get("auth/password/verify/resend", [VerificationController::class, "resendPasswordRecovery"])->name("resend-forget-password");
 Route::post("auth/password/reset", [UserController::class, "resetPassword"])->name("password-reset");
+
+Route::middleware(["auth.user"])->group(function () {
+    Route::delete("users/{userid}/logout", [UserController::class, "logout"])->name("logout");
+
+    //PROFILE ENDPOINTS
+    Route::post("users/{userid}/profile", [ProfileController::class, "updateUserProfile"])->name("update-profile");
+    Route::get("users/{userid}/profile", [ProfileController::class, "getUserProfile"]);
+    Route::post("users/{userid}/profile/photo", [ProfileController::class, "updateUserProfilePhoto"]);
+    Route::post("users/{userid}/profile/change-password", [UserController::class, "changePassword"]);
+});
+
+//mail password 6v4=E9.#wyuB
