@@ -28,7 +28,7 @@ class ResetPasswordRequest extends FormRequest
     {
         return [
             //
-            "userid" => ["required"],
+            // "userid" => ["required"],
             "newpassword" => ["required", Password::min(8)->letters()->numbers(), "max:32"],
             "confirmpassword" => ["required", "same:newpassword"]
         ];

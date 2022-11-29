@@ -30,7 +30,7 @@ class UserRegistrationRequest extends FormRequest
             //
             "firstname" => ["required", "regex: /^[a-zA-Z]{5,32}$/", "max:32"],
             "lastname" => ["required", "regex: /^[a-zA-Z]{5,32}$/", "max:32"],
-            "username" => ["required", "regex: /^[a-zA-Z]+[\w@_]+$/", "max:20"],
+            "username" => ["required", "regex: /^[a-zA-Z]+[\w@_]+$/", "max:20", "unique:users,username"],
             "institution" => ["required", "regex: /^\w{5,}(\s|\w)+$/", "max:200"],
             "gender" => ["required", "regex: /^[a-zA-Z]+$/", "max:10"],
             "email" => ["required", "email:dns", "unique:users,email"],

@@ -26,12 +26,12 @@ Route::get("test", function () {
 
 
 Route::post("users/register", [UserController::class, "register"])->name("register");
-Route::post("users/login", [UserController::class, "login"])->name("login");
+Route::post("auth/login", [UserController::class, "login"])->name("login");
 
 Route::post("auth/account/verify", [VerificationController::class, "verifyAccount"])->name("verify-account");
 Route::get("auth/account/verify/resend", [VerificationController::class, "resendAccountVerification"])->name("resend-verify-account");
 
 Route::post("auth/password", [UserController::class, "forgotPassword"])->name("forgot-password");
-Route::post("auth/password/verify", [VerificationController::class, "verifyPasswordRecovery"])->name("verify-forget-password");
+Route::get("auth/password/verify", [VerificationController::class, "verifyPasswordRecovery"])->name("verify-forget-password");
 Route::get("auth/password/verify/resend", [VerificationController::class, "resendPasswordRecovery"])->name("resend-forget-password");
 Route::post("auth/password/reset", [UserController::class, "resetPassword"])->name("password-reset");

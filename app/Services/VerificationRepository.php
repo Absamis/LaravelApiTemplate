@@ -59,19 +59,23 @@ class VerificationRepository extends BaseRepository
 
     public function verifyPasswordRecovery($data)
     {
+        $redirect = config("services.errandapp.redirect_url");
         try {
             $token = Crypt::decryptString($data["tkn"]);
-            $userid = $data["userid"];
-            $code = $data["code"];
-            $user = User::with(["verifications"])->where("remember_token", $userid)->first();
-            if (!$user)
-                return $this->processResponse("99", "Unauthorized user");
+            // $userid = $data["userid"];
+            // $code = $data["code"];
+            $verify = Verification::with(["users"])->where(["token" => $token, "verify_type" => 2])->first();
+            if (!$verify) {
+                $redirect = $redirect . "?status=failed&message=Invalid verification link";
+                return $this->processResponse("00", "redirect", ["url" => $redirect]);
+            }
+            $user = $verify->users()->first();
             $userid = $user->userid;
-            $verify = $user->verifications()->where(["userid" => $userid, "token" => $token, "verify_type" => 2])->first();
-            if (!$verify)
-                return $this->processResponse("99", "Invalid verification link");
-            if (!Hash::check($code, $verify->code))
-                return $this->processResponse("99", "Incorrect Code");
+            // $verify = $user->verifications()->where(["userid" => $userid, "token" => $token, "verify_type" => 2])->first();
+            // if (!$verify)
+            //     return $this->processResponse("99", "Invalid verification link");
+            // if (!Hash::check($code, $verify->code))
+            //     return $this->processResponse("99", "Incorrect Code");
             $tkn = str_replace("-", "", Str::uuid());
             $tkn1 = Crypt::encryptString($tkn);
             $rmtkn = md5(Str::uuid());
@@ -81,9 +85,12 @@ class VerificationRepository extends BaseRepository
             $verify->save();
             $user->save();
             $resetUrl = route("password-reset", ["hash" => $tkn1]);
-            return $this->processResponse("00", "Account verified. Change your password", ["resetUrl" => $resetUrl, "userid" => $rmtkn]);
+            $redirect = $redirect . "?status=success&message=Account verified&hash=$tkn1";
+            return $this->processResponse("00", "redirect", ["url" => $redirect]);
+            // return $this->processResponse("00", "Account verified. Change your password", ["resetUrl" => $resetUrl, "userid" => $rmtkn]);
         } catch (Exception $ex) {
-            return $this->processResponse("99", "Error occured. Try again");
+            $redirect = $redirect . "?status=failed&message=Error occured. Try again";
+            return $this->processResponse("99", "redirect", ["url" => $redirect]);
         }
     }
 

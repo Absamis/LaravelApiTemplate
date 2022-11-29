@@ -30,12 +30,14 @@ class VerificationController extends Controller
         return $this->actionResponse($response);
     }
 
-    public function verifyPasswordRecovery(VerifyAccountRequest $request)
+    public function verifyPasswordRecovery(Request $request)
     {
         if (!$request->has("tkn"))
             return $this->actionResponse(["code" => "99", "message" => "Invalid verification link"]);
         $response = $this->verifyService->verifyPasswordRecovery($request->all());
-        return $this->actionResponse($response);
+        // if ($response["code"] == "00")
+        return redirect($response["data"]["url"]);
+        // return $this->actionResponse($response);
     }
 
     public function resendPasswordRecovery(Request $request)

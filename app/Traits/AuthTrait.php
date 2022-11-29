@@ -25,7 +25,7 @@ trait AuthTrait
             $resendUrl = route("resend-verify-account", ["tkn" => $token]);
             $verifyUrl = route("verify-account", ["tkn" => $token]);
             $userData = ["name" => $fullname, "email" => $email];
-            $mailData = ["code" => $code];
+            $mailData = ["code" => $code, "verifyUrl" => $verifyUrl];
             AccountRegistered::dispatch($userData, $mailData);
             $code = Hash::make($code);
             $this->saveVerificationData($userid, $code, $vtype, $token);
@@ -49,7 +49,7 @@ trait AuthTrait
             $resendUrl = route("resend-forget-password", ["tkn" => $tkn]);
             $verifyUrl = route("verify-forget-password", ["tkn" => $tkn]);
             $userData = ["name" => $fullname, "email" => $email];
-            $mailData = ["code" => $code];
+            $mailData = ["code" => $code, "verifyUrl" => $verifyUrl];
             PasswordRecovery::dispatch($userData, $mailData);
             $code = Hash::make($code);
             $this->saveVerificationData($userid, $code, $vtype, $token);

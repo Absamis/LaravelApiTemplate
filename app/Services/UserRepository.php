@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Events\PasswordChanged;
 use App\Models\User;
+use App\Models\Verification;
 use App\Traits\AuthTrait;
 use Exception;
 use Illuminate\Support\Facades\Crypt;
@@ -60,15 +61,17 @@ class UserRepository extends BaseRepository
     {
         try {
             $token = Crypt::decryptString($data["hash"]);
-            $userid = $data["userid"];
+            // $userid = $data["userid"];
             $password = $data["newpassword"];
-            $user = User::with(["verifications"])->where("remember_token", $userid)->first();
-            if (!$user)
-                return $this->processResponse("99", "Unauthorized user");
-            $userid = $user->userid;
-            $verify = $user->verifications()->where(["userid" => $userid, "token" => $token, "verify_type" => 22])->first();
+            $verify = Verification::with(["users"])->where(["token" => $token, "verify_type" => 22])->first();
             if (!$verify)
                 return $this->processResponse("99", "Request cannot be processed at the moment");
+            // $user = User::with(["verifications"])->where("remember_token", $userid)->first();
+            // if (!$user)
+            //     return $this->processResponse("99", "Unauthorized user");
+            $user = $verify->users()->first();
+            $userid = $user->userid;
+
             if (Hash::check($password, $user->password))
                 return $this->processResponse("99", "You can't use your previous password.");
             $rmtkn = md5(Str::uuid());
