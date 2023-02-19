@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Auth;
 
+use App\Traits\Enums\ResponseCodeEnum;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -9,6 +10,7 @@ use Illuminate\Validation\Rules\Password;
 
 class UserRegistrationRequest extends FormRequest
 {
+    use ResponseCodeEnum;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -28,14 +30,11 @@ class UserRegistrationRequest extends FormRequest
     {
         return [
             //
-            "firstname" => ["required", "regex: /^[a-zA-Z]{5,32}$/", "max:32"],
-            "lastname" => ["required", "regex: /^[a-zA-Z]{5,32}$/", "max:32"],
             "username" => ["required", "regex: /^[a-zA-Z]+[\w@_]+$/", "max:20", "unique:users,username"],
-            "institution" => ["required", "regex: /^\w{5,}(\s|\w)+$/", "max:200"],
-            "gender" => ["required", "regex: /^[a-zA-Z]+$/", "max:10"],
             "email" => ["required", "email:dns", "unique:users,email"],
             "phone" => ["required", "regex: /^\+[1-9]{1,3}[0-9]{10,13}$/", "max:16"],
-            "password" => ["required", Password::min(8)->letters()->numbers(), "max:32"]
+            "password" => ["required", Password::min(8)->letters()->numbers(), "max:32"],
+            "confirm_password" => ["required", "same:password"]
         ];
     }
 
@@ -53,8 +52,8 @@ class UserRegistrationRequest extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
-            "code" => "33",
-            "message" => "Form validation error",
+            "code" => $this->formError["code"],
+            "message" => $this->formError["message"],
             "data" => [],
             "errors" => $validator->errors()
         ], 400));

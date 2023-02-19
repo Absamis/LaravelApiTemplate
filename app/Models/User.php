@@ -29,7 +29,6 @@ class User extends Authenticatable
         'firstname',
         'lastname',
         'username',
-        'institution',
         'gender',
         'email',
         'phone',
@@ -64,7 +63,7 @@ class User extends Authenticatable
     protected function photo(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => Storage::disk("profile-photo")->url($value)
+            get: fn ($value) => ($value) ? Storage::disk("profile")->url($value) : null
         );
     }
 

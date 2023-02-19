@@ -49,7 +49,7 @@ class PasswordReset extends Mailable
     public function content()
     {
         return new Content(
-            markdown: 'mail.password-reset',
+            markdown: 'mail.account-verification',
             with: [
                 "data" => $this->data,
                 "user" => $this->user

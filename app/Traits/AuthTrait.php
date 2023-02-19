@@ -4,56 +4,48 @@ namespace App\Traits;
 
 use App\Events\AccountRegistered;
 use App\Events\PasswordRecovery;
+use App\Mail\AccountVerification;
+use App\Mail\PasswordReset;
+use App\Models\PasswordSalt;
 use App\Models\Verification;
+use App\Traits\Enums\StatusCodesEnum;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 trait AuthTrait
 {
-    public function sendAccountVerificationCode($user)
+    use StatusCodesEnum;
+    public function sendVerificationCode($user, $type)
     {
         try {
-            $code = mt_rand(1111111, 9999999);
+            $code = mt_rand(1111, 9999);
             $token = str_replace("-", "", Str::uuid());
-            $vtype = 1;
+            $vtype = 0;
             $userid = $user->userid;
-            $tkn = $user->remember_token;
             $email = $user->email;
-            $fullname = $user->firstname . " " . $user->lastname;
-            $resendUrl = route("resend-verify-account", ["tkn" => $token]);
-            $verifyUrl = route("verify-account", ["tkn" => $token]);
-            $userData = ["name" => $fullname, "email" => $email];
-            $mailData = ["code" => $code, "verifyUrl" => $verifyUrl];
-            AccountRegistered::dispatch($userData, $mailData);
+            $name = $user->username;
+            $userData = ["name" => $name, "email" => $email];
+            $mailData = ["code" => $code, "verifyUrl" => ""];
+            switch ($type) {
+                case "account":
+                    $vtype = $this->accountVerificationStatusCode;
+                    Mail::to($email)->send(new AccountVerification($userData, $mailData));
+                    break;
+                case "password":
+                    $vtype = $this->passwordResetStatusCode;
+                    Mail::to($email)->send(new PasswordReset($userData, $mailData));
+                    break;
+                default:
+                    return [];
+            }
+            // AccountRegistered::dispatch($userData, $mailData);
             $code = Hash::make($code);
             $this->saveVerificationData($userid, $code, $vtype, $token);
-            return ["success" => true, "data" => ["resendUrl" => $resendUrl, "verifyUrl" => $verifyUrl, "userid" => $tkn]];
-        } catch (Exception $ex) {
-            return ["success" => false, "message" => "Error occured."];
-        }
-    }
-
-    public function sendPasswordRecoveryCode($user)
-    {
-        try {
-            $code = mt_rand(1111111, 9999999);
-            $token = str_replace("-", "", Str::uuid());
-            $vtype = 2;
-            $userid = $user->userid;
-            $tkns = $user->remember_token;
-            $email = $user->email;
-            $fullname = $user->firstname . " " . $user->lastname;
-            $tkn = Crypt::encryptString($token);
-            $resendUrl = route("resend-forget-password", ["tkn" => $tkn]);
-            $verifyUrl = route("verify-forget-password", ["tkn" => $tkn]);
-            $userData = ["name" => $fullname, "email" => $email];
-            $mailData = ["code" => $code, "verifyUrl" => $verifyUrl];
-            PasswordRecovery::dispatch($userData, $mailData);
-            $code = Hash::make($code);
-            $this->saveVerificationData($userid, $code, $vtype, $token);
-            return ["success" => true, "data" => ["resendUrl" => $resendUrl, "verifyUrl" => $verifyUrl, "userid" => $tkns]];
+            return ["success" => true, "data" => ["token" => $token]];
         } catch (Exception $ex) {
             return ["success" => false, "message" => "Error occured."];
         }
@@ -71,5 +63,36 @@ trait AuthTrait
                 "token" => $token
             ]
         );
+    }
+
+
+    public function saltPassword($userid, $password)
+    {
+        try {
+            $salt = base64_encode(mt_rand());
+            $newpass = $salt . $password;
+            $pass = PasswordSalt::updateOrCreate([
+                "userid" => $userid
+            ], [
+                "salt" => $salt
+            ]);
+            return $newpass;
+        } catch (Exception $ex) {
+            // echo ($ex);
+            return null;
+        }
+    }
+
+    public function getPasswordSalt($userid)
+    {
+        $slt = PasswordSalt::where("userid", $userid)->first();
+        return $slt["salt"];
+    }
+
+    public function refreshUserCacheData($user)
+    {
+        $userid = $user->userid;
+        Cache::put($userid . "_DT", $user, 3600);
+        // Cache::forget($userid . "_VRF");
     }
 }

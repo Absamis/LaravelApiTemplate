@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
 // header("Content-Type: application/json");
 
-use App\Http\Requests\AccountEmailRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\AccountEmailRequest;
 use App\Http\Requests\ChangePasswordRequest;
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\ResetPasswordRequest;
-use App\Http\Requests\UserRegistrationRequest;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
+use App\Http\Requests\Auth\UserRegistrationRequest;
 use App\Models\User;
 use App\Services\UserRepository;
 use Illuminate\Http\Request;
@@ -40,15 +41,7 @@ class UserController extends Controller
 
     public function resetPassword(ResetPasswordRequest $request)
     {
-        if (!$request->has("hash"))
-            return $this->actionResponse(["code" => "99", "message" => "Invalid verification link"]);
         $response = $this->userRepo->resetPassword($request->all());
-        return $this->actionResponse($response);
-    }
-
-    public function  changePassword($userid, ChangePasswordRequest $request)
-    {
-        $response = $this->userRepo->changePassword($userid, $request->validated());
         return $this->actionResponse($response);
     }
 

@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Auth;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rules\Password;
 
-class VerifyAccountRequest extends FormRequest
+class ResetPasswordRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,8 +28,9 @@ class VerifyAccountRequest extends FormRequest
     {
         return [
             //
-            "userid" => "required",
-            "code" => ["required", "numeric"]
+            "token" => ["required"],
+            "new_password" => ["required", Password::min(8)->letters()->numbers(), "max:32"],
+            "confirm_password" => ["required", "same:new_password"]
         ];
     }
 

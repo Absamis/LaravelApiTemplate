@@ -1,1 +1,1 @@
-<p> Welcome to Errand mate application. We are at your full service </p>
+<p> Welcome to{{config("app.name")}}. We are at your full service </p>

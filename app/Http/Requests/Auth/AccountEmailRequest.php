@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Auth;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Validation\Rules\Password;
 
-class ResetPasswordRequest extends FormRequest
+class AccountEmailRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -28,9 +27,7 @@ class ResetPasswordRequest extends FormRequest
     {
         return [
             //
-            // "userid" => ["required"],
-            "newpassword" => ["required", Password::min(8)->letters()->numbers(), "max:32"],
-            "confirmpassword" => ["required", "same:newpassword"]
+            "email" => ["required", "email:dns"]
         ];
     }
 

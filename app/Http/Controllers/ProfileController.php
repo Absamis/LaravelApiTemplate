@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\UpdateProfilePhotoRequest;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Services\UserProfileRepository;
@@ -30,12 +31,13 @@ class ProfileController extends Controller
 
     public function updateUserProfilePhoto($userid, UpdateProfilePhotoRequest $request)
     {
-        $url = Storage::disk("profile-photo")->put("profile-photo", $request->file("photo"));
-        $response = $this->userProfileRepo->updateProfilePhoto($userid, $url);
+        $response = $this->userProfileRepo->updateProfilePhoto($userid, $request->file("photo"));
         return $this->actionResponse($response);
     }
 
-    public function contactSupport()
+    public function  changePassword($userid, ChangePasswordRequest $request)
     {
+        $response = $this->userProfileRepo->changePassword($userid, $request->validated());
+        return $this->actionResponse($response);
     }
 }

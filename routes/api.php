@@ -2,8 +2,8 @@
 header("Content-Type: application/json");
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\VerificationController;
+use App\Http\Controllers\Auth\UserController;
+use App\Http\Controllers\Auth\VerificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,25 +26,25 @@ Route::get("test", function () {
 });
 
 
-Route::post("users/register", [UserController::class, "register"])->name("register");
-Route::post("auth/login", [UserController::class, "login"])->name("login");
+Route::prefix("auth")->group(function () {
+    Route::post("/register", [UserController::class, "register"])->name("register");
+    Route::post("/account/verify", [VerificationController::class, "verifyAccount"])->name("verify-account");
 
-Route::post("auth/account/verify", [VerificationController::class, "verifyAccount"])->name("verify-account");
-Route::get("auth/account/verify/resend", [VerificationController::class, "resendAccountVerification"])->name("resend-verify-account");
+    Route::post("/password", [UserController::class, "forgotPassword"])->name("forgot-password");
+    Route::post("/password/verify", [VerificationController::class, "verifyPasswordReset"])->name("verify-forget-password");
+    Route::post("/password/reset", [UserController::class, "resetPassword"])->name("password-reset");
 
-Route::post("auth/password", [UserController::class, "forgotPassword"])->name("forgot-password");
-Route::get("auth/password/verify", [VerificationController::class, "verifyPasswordRecovery"])->name("verify-forget-password");
-Route::get("auth/password/verify/resend", [VerificationController::class, "resendPasswordRecovery"])->name("resend-forget-password");
-Route::post("auth/password/reset", [UserController::class, "resetPassword"])->name("password-reset");
+    Route::post("/{vrf_type}/verify/resend", [VerificationController::class, "resendVerificationCode"])->name("resend-verify-code");
 
-Route::middleware(["auth.user"])->group(function () {
-    Route::delete("users/{userid}/logout", [UserController::class, "logout"])->name("logout");
-
+    Route::post("/login", [UserController::class, "login"])->name("login");
+});
+Route::middleware(["auth.user"])->prefix("users")->group(function () {
     //PROFILE ENDPOINTS
-    Route::post("users/{userid}/profile", [ProfileController::class, "updateUserProfile"])->name("update-profile");
-    Route::get("users/{userid}/profile", [ProfileController::class, "getUserProfile"]);
-    Route::post("users/{userid}/profile/photo", [ProfileController::class, "updateUserProfilePhoto"]);
-    Route::post("users/{userid}/profile/change-password", [UserController::class, "changePassword"]);
+    Route::get("/{userid}", [ProfileController::class, "getUserProfile"]);
+    Route::put("/{userid}", [ProfileController::class, "updateUserProfile"])->name("update-profile");
+    Route::post("/{userid}/profile/photo", [ProfileController::class, "updateUserProfilePhoto"]);
+    Route::put("/{userid}/profile/change-password", [ProfileController::class, "changePassword"]);
+    Route::delete("/{userid}/logout", [UserController::class, "logout"])->name("logout");
 });
 
 //mail password 6v4=E9.#wyuB

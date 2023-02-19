@@ -43,10 +43,10 @@ return [
             'visibility' => 'public',
             'throw' => false,
         ],
-        'profile-photo' => [
+        'profile' => [
             'driver' => 'local',
-            'root' => storage_path('app'),
-            'url' => env('APP_URL') . '/errandmate',
+            'root' => storage_path('app') . "/profile",
+            'url' => env('APP_URL') . '/uploads',
             'visibility' => 'public',
             'throw' => false,
         ],
@@ -77,7 +77,7 @@ return [
 
     'links' => [
         public_path('storage') => storage_path('app/public'),
-        public_path("errandmate/profile-photo") => storage_path('app/profile-photo'),
+        public_path("uploads/photo") => storage_path('app/profile/photo'),
     ],
 
 ];
